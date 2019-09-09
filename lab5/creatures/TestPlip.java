@@ -1,13 +1,12 @@
 package creatures;
+import huglife.*;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import java.awt.*;
 import java.util.HashMap;
-import java.awt.Color;
-import huglife.Direction;
-import huglife.Action;
-import huglife.Occupant;
-import huglife.Impassible;
-import huglife.Empty;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /** Tests the plip class
  *  @authr FIXME
@@ -33,9 +32,22 @@ public class TestPlip {
     @Test
     public void testReplicate() {
         // TODO
+        Plip p1 = new Plip(2);
+        assertEquals(2,p1.energy(),0.01);
+        p1.move();
+        p1.move();
+        assertEquals(1.70,p1.energy(),0.01);
+        assertEquals(0.85,p1.replicate().energy(),0.01);
+        assertEquals(0.85,p1.energy(),0.01);
+        p1.stay();
+        assertEquals(1.05,p1.energy(),0.01);
+        p1.stay();
+        assertEquals(1.25,p1.energy(),0.01);
+        p1.replicate();
+        assertEquals(0.625,p1.energy(),0.01);
     }
 
-    //@Test
+    @Test
     public void testChoose() {
 
         // No empty adjacent spaces; stay.

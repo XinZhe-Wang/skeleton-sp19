@@ -1,20 +1,22 @@
 package creatures;
 
+import edu.princeton.cs.algs4.StdRandom;
 import huglife.Action;
 import huglife.Creature;
 import huglife.Direction;
 import huglife.Occupant;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An implementation of a motile pacifist photosynthesizer.
  *
  * @author Josh Hug
  */
-public class Plip extends Creature {
+public class Clorus extends Creature {
 
     /**
      * red color.
@@ -34,18 +36,18 @@ public class Plip extends Creature {
     /**
      * creates plip with energy equal to E.
      */
-    public Plip(double e) {
-        super("plip");
-        r = 99;
+    public Clorus(double e) {
+        super("Clorus");
+        r = 34;
         g = 0;
-        b = 76;
+        b = 231;
         energy = e;
     }
 
     /**
      * creates a plip with energy equal to 1.
      */
-    public Plip() {
+    public Clorus() {
         this(1);
     }
 
@@ -58,25 +60,14 @@ public class Plip extends Creature {
      * that you get this exactly correct.
      */
     public Color color() {
-        if (energy==0){
-            g=63;
-            return color(r,g,b);
-        }
-        else if (energy ==2){
-            g=255;
-            return color(r,g,b);
-        }
-        else {
-            g=(int)(96*energy+63);
-            return color(r,g,b);
-        }
+        return color(r,g,b);
     }
 
     /**
      * Do nothing with C, Plips are pacifists.
      */
     public void attack(Creature c) {
-        // do nothing.
+        energy = energy+c.energy();
     }
 
     /**
@@ -85,12 +76,7 @@ public class Plip extends Creature {
      * private static final variable. This is not required for this lab.
      */
     public void move() {
-        energy = energy-0.15; /*Pilp每Move一次都会lose 0.15*/
-        if (energy<0){
-            energy = 0;
-        }else if (energy>2){
-            energy =2;
-        }
+        energy = energy-0.03; /*Clorus每Move一次都会lose 0.03*/
         // TODO
     }
 
@@ -100,11 +86,9 @@ public class Plip extends Creature {
      */
     public void stay() {
         // TODO
-        energy = energy+0.2; /*Pilp每Stay一次都会gain 0.2*/
+        energy = energy+0.01; /*Clorus每Stay一次都会gain 0.01*/
         if (energy<0){
             energy = 0;
-        }else if (energy>2){
-            energy =2;
         }
     }
 
@@ -113,10 +97,10 @@ public class Plip extends Creature {
      * lost to the process. Now that's efficiency! Returns a baby
      * Plip.
      */
-    public Plip replicate() {
+    public Clorus replicate() {
         double babyEnergy = energy*0.5;
         energy = energy*0.5;
-        return new Plip(babyEnergy);
+        return new Clorus(babyEnergy);
     }
 
     /**
@@ -135,25 +119,31 @@ public class Plip extends Creature {
     public Action chooseAction(Map<Direction, Occupant> neighbors) {
         // Rule 1
         List<Direction> emptyNeighbors = new ArrayList<>();
-        List<Direction> clorusNeighbors = new ArrayList<>();
-        boolean anyClorus = false;
-        for (Map.Entry<Direction,Occupant> entry:neighbors.entrySet()){
-            if (entry.getValue().name().equals("empty")){
-                emptyNeighbors.add(entry.getKey());
+        List<Direction> pilpNeighbors = new ArrayList<>();
+
+        for (Direction d: neighbors.keySet()){
+            if (neighbors.get(d).name()=="empty"){
+                emptyNeighbors.add(d);
             }
-            if (entry.getValue().name().equals("Clorus")){
-                clorusNeighbors.add(entry.getKey());
-                anyClorus =true;
+            else if (neighbors.get(d).name()=="plip"){
+                pilpNeighbors.add(d);
             }
         }
-        /*Collections.shuffle(emptyNeighbors);*/
-        if (emptyNeighbors.size()==0){
+        /*Collections.shuffle(emptyNeighbors);
+        Collections.shuffle(pilpNeighbors);*/
+        if (emptyNeighbors.isEmpty()&&pilpNeighbors.isEmpty()){
             return new Action(Action.ActionType.STAY);
+        }else if (!pilpNeighbors.isEmpty()){
+            int moveDir = StdRandom.uniform(pilpNeighbors.size());
+            return new Action(Action.ActionType.ATTACK,pilpNeighbors.get(moveDir));
         }else if (this.energy>=1){
-            return new Action(Action.ActionType.REPLICATE,emptyNeighbors.get((int)Math.random()*emptyNeighbors.size()));
-        }else if (anyClorus==true && Math.random()<0.5){
-            return new Action(Action.ActionType.MOVE,emptyNeighbors.get((int)Math.random()*emptyNeighbors.size()));
-        }else return new Action(Action.ActionType.STAY);
+            int moveDir = StdRandom.uniform(emptyNeighbors.size());
+            return new Action(Action.ActionType.REPLICATE,emptyNeighbors.get(moveDir));
+        }else if (this.energy<0){
+            return new Action(Action.ActionType.DIE);
+        }
+        int moveDir = StdRandom.uniform(emptyNeighbors.size());
+        return new Action(Action.ActionType.MOVE,emptyNeighbors.get(moveDir));
 
         // TODO
         // (Google: Enhanced for-loop over keys of NEIGHBORS?)
